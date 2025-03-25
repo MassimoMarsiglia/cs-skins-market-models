@@ -1,13 +1,13 @@
 {
     "editor.formatOnSave": true,
     "editor.codeActionsOnSave": {
-      "source.organizeImports": true
+      "source.organizeImports": "explicit"
     },
     "[go]": {
       "editor.defaultFormatter": "golang.go",
       "editor.formatOnSave": true,
       "editor.codeActionsOnSave": {
-        "source.organizeImports": true
+        "source.organizeImports": "explicit"
       }
     },
     "go.formatTool": "goimports",

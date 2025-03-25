@@ -29,20 +29,32 @@ func Connect() {
 func InitDB() {
 	Connect()
 	createEnums()
-	err := DB.AutoMigrate(
-		&models.TournamentTeam{}, 
-		&models.Tournament{}, 
-		&models.Wear{}, 
-		&models.Rarity{}, 
-		&models.Weapon{}, 
+
+	if err := DB.AutoMigrate(
+		&models.TournamentTeam{},
+		&models.Tournament{},
+		&models.Rarity{},
+		&models.Weapon{},
 		&models.Collection{},
+		&models.Wear{},
+		&models.Skin{},
+		&models.Sticker{},
+		&models.Patch{},
+		&models.Agent{},
+		&models.Charm{},
+		&models.Case{},
 		&models.Item{},
-		&models.Sticker{},  
+		&models.ItemProperties{},
+		&models.StickerAttributes{},
+		&models.PatchAttributes{},
+		&models.CharmAttributes{},
+		&models.ItemAttributes{},
 		&models.ItemSkin{},
-	)
-	if err != nil {
-		log.Fatal("Failed to migrate database")
+	); err != nil {
+		log.Fatalf("Failed to migrate item tables: %v", err)
 	}
+
+	log.Println("Database migration completed successfully")
 }
 
 func createEnums() {
