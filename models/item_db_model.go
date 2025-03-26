@@ -42,6 +42,8 @@ type Weapon struct {
 type Collection struct {
 	ID       string    `gorm:"primaryKey"`
 	Name     string    `gorm:"unique;not null"`
+	Image    string    `gorm:"not null"`
+	Crates   []Case    `gorm:"foreignKey:CollectionId"`
 	Skins    []Skin    `gorm:"foreignKey:CollectionId"`
 	Stickers []Sticker `gorm:"foreignKey:CollectionId"`
 	Agents   []Agent   `gorm:"foreignKey:CollectionId"`
@@ -130,6 +132,7 @@ type ItemSkin struct {
 	MarketHashName string
 	WearId         string `gorm:"not null"` // Foreign key reference
 	SkinId         string `gorm:"not null"` // Foreign key reference
+	Image          string `gorm:"not null"`
 
 	Wear Wear `gorm:"foreignKey:WearId;references:ID;constraint:OnDelete:CASCADE"` // Ensures correct mapping to Wear.ID
 	Skin Skin `gorm:"foreignKey:SkinId;references:ID;constraint:OnDelete:CASCADE"` // Ensures correct mapping to Skin.ID
@@ -148,6 +151,7 @@ type Skin struct {
 	Weapon       Weapon     `gorm:"foreignKey:WeaponId"`
 	RarityId     string     `gorm:"not null"`
 	Rarity       Rarity     `gorm:"foreignKey:RarityId"`
+	PaintIndex   uint16     `gorm:"not null"`
 	MinFloat     float64    `gorm:"not null"`
 	MaxFloat     float64    `gorm:"not null"`
 	Stattrak     bool       //defines if a skin can be stattrak
@@ -162,6 +166,7 @@ type Sticker struct {
 	Collection   Collection `gorm:"foreignKey:CollectionId"`
 	RarityId     string     `gorm:"not null"`
 	Rarity       Rarity     `gorm:"foreignKey:RarityId"`
+	Image        string     `gorm:"not null"`
 
 	//Tournament stickers
 	TournamentId string         //optional
@@ -177,7 +182,15 @@ type Patch struct {
 	Collection   Collection `gorm:"foreignKey:CollectionId"`
 	RarityId     string     `gorm:"not null"`
 	Rarity       Rarity     `gorm:"foreignKey:RarityId"`
+	Image        string     `gorm:"not null"`
 }
+
+type TeamType string
+
+const (
+	Terrorist        TeamType = "Terrorist"
+	CounterTerrorist TeamType = "Counter-Terrorist"
+)
 
 type Agent struct {
 	ID           string     `gorm:"primaryKey"`
@@ -186,6 +199,8 @@ type Agent struct {
 	Collection   Collection `gorm:"foreignKey:CollectionId"`
 	RarityId     string     `gorm:"not null"`
 	Rarity       Rarity     `gorm:"foreignKey:RarityId"`
+	Team         TeamType   `gorm:"type:team_type;not null"`
+	Image        string     `gorm:"not null"`
 }
 
 type Charm struct {
@@ -195,6 +210,7 @@ type Charm struct {
 	Collection   Collection `gorm:"foreignKey:CollectionId"`
 	RarityId     string     `gorm:"not null"`
 	Rarity       Rarity     `gorm:"foreignKey:RarityId"`
+	Image        string     `gorm:"not null"`
 }
 
 type Case struct {
@@ -202,4 +218,5 @@ type Case struct {
 	Name         string     `gorm:"unique;not null"`
 	CollectionId string     `gorm:"not null"`
 	Collection   Collection `gorm:"foreignKey:CollectionId"`
+	Image        string     `gorm:"not null"`
 }

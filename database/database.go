@@ -79,4 +79,14 @@ func createEnums() {
         END
         $$;
     `)
+
+	DB.Exec(`
+        DO $$
+        BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'team_type') THEN
+                CREATE TYPE team_type AS ENUM ('Charm', 'Skin', 'Sticker', 'Patch', 'Agent', 'Case');
+            END IF;
+        END
+        $$;
+    `)
 }
