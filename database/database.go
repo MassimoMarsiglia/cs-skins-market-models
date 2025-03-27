@@ -28,11 +28,14 @@ func Connect() {
 
 func InitDB() {
 	Connect()
+	DB.Exec("DROP SCHEMA public CASCADE; CREATE SCHEMA public;")
 	createEnums()
 
 	if err := DB.AutoMigrate(
-		&models.TournamentTeam{},
+		&models.Category{},
 		&models.Tournament{},
+		&models.TournamentTeam{},
+		&models.TournamentTeamRelation{},
 		&models.Rarity{},
 		&models.Weapon{},
 		&models.Collection{},
@@ -63,7 +66,7 @@ func createEnums() {
         DO $$
         BEGIN
             IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'wear_type') THEN
-                CREATE TYPE wear_type AS ENUM ('Factory_New', 'Minimal_Wear', 'Field_Tested', 'Well_Worn', 'Battle_Scarred');
+                CREATE TYPE wear_type AS ENUM ('Factory New', 'Minimal Wear', 'Field-Tested', 'Well-Worn', 'Battle-Scarred');
             END IF;
         END
         $$;

@@ -3,40 +3,44 @@ package models
 type WearType string
 
 const (
-	FactoryNew    WearType = "Factory_New"
-	MinimalWear   WearType = "Minimal_Wear"
-	FieldTested   WearType = "Field_Tested"
-	WellWorn      WearType = "Well_Worn"
-	BattleScarred WearType = "Battle_Scarred"
+	FactoryNew    WearType = "Factory New"
+	MinimalWear   WearType = "Minimal Wear"
+	FieldTested   WearType = "Field-Tested"
+	WellWorn      WearType = "Well-Worn"
+	BattleScarred WearType = "Battle-Scarred"
 )
 
 type Tournament struct {
-	ID   string `gorm:"primaryKey"`
-	Name string `gorm:"unique;not null"`
+	ID    uint32           `gorm:"primaryKey"`
+	Name  string           `gorm:"unique;not null"`
+	Teams []TournamentTeam `gorm:"many2many:tournament_team_relations;"`
 }
 
 type TournamentTeam struct {
-	ID         string     `gorm:"primaryKey"`
-	Tournament Tournament `gorm:"foreignKey:ID"`
-	Team       string     `gorm:"not null"`
+	ID    uint32           `gorm:"primaryKey"`
+	Team  string           `gorm:"not null"`
+	Teams []TournamentTeam `gorm:"many2many:tournament_team_relations;"`
+}
+
+type TournamentTeamRelation struct {
+	TournamentID     uint32 `gorm:"primaryKey"`
+	TournamentTeamID uint32 `gorm:"primaryKey"`
 }
 
 type Wear struct {
-	ID       string   `gorm:"primaryKey"`
-	Name     WearType `gorm:"type:wear_type;not null"`
-	MinFloat float64  `gorm:"not null"` //minimum Float for Wear
-	MaxFloat float64  `gorm:"not null"` //maximum Float for Wear
+	ID   string   `gorm:"primaryKey"`
+	Name WearType `gorm:"type:wear_type;not null"`
 }
 
 type Rarity struct {
-	ID         string `gorm:"primaryKey"`
-	Name       string `gorm:"unique;not null"`
-	NameWeapon string `gorm:"unique;not null"`
+	ID    string `gorm:"primaryKey"`
+	Name  string `gorm:"not null"`
+	Color string
 }
 
 type Weapon struct {
 	ID   string `gorm:"primaryKey"`
-	Name string `gorm:"unique;not null"`
+	Name string `not null"`
 }
 
 type Collection struct {
@@ -152,25 +156,26 @@ type Team struct {
 
 type Pattern struct {
 	ID   string `gorm:"primaryKey"`
-	Name string `gorm:"unique;not null"`
+	Name string `gorm:"not null"`
 }
 
 // define base skin without specific wears
 type Skin struct {
-	ID           string     `gorm:"primaryKey"`
-	Name         string     `gorm:"unique;not null"`
-	Image        string     `gorm:"not null"`
-	CollectionId string     `gorm:"not null"`
-	Collection   Collection `gorm:"foreignKey:CollectionId"`
-	WeaponId     string     `gorm:"not null"`
-	Weapon       Weapon     `gorm:"foreignKey:WeaponId"`
-	RarityId     string     `gorm:"not null"`
-	Rarity       Rarity     `gorm:"foreignKey:RarityId"`
-	PaintIndex   uint16     `gorm:"not null"`
-	MinFloat     float64    `gorm:"not null"`
-	MaxFloat     float64    `gorm:"not null"`
-	Stattrak     bool       //defines if a skin can be stattrak
-	Souvenir     bool       //defines if a skin can be souvenir
+	ID         string  `gorm:"primaryKey"`
+	Name       string  `gorm:"not null"`
+	Image      string  `gorm:"not null"`
+	WeaponId   string  `gorm:"not null"`
+	Weapon     Weapon  `gorm:"foreignKey:WeaponId"`
+	RarityId   string  `gorm:"not null"`
+	Rarity     Rarity  `gorm:"foreignKey:RarityId"`
+	PaintIndex uint16  `gorm:"not null"`
+	MinFloat   float64 `gorm:"not null"`
+	MaxFloat   float64 `gorm:"not null"`
+	Stattrak   bool    //defines if a skin can be stattrak
+	Souvenir   bool    //defines if a skin can be souvenir
+
+	CollectionId *string
+	Collection   *Collection `gorm:"foreignKey:CollectionId"`
 
 	CategoryId string   `gorm:"not null"`
 	Category   Category `gorm:"foreignKey:CategoryId;references:ID;constraint:OnDelete:CASCADE"`
@@ -187,19 +192,24 @@ type Skin struct {
 }
 
 type Sticker struct {
-	ID           string     `gorm:"primaryKey"` //id from game files
-	Name         string     `gorm:"unique;not null"`
-	CollectionId string     `gorm:"not null"`
-	Collection   Collection `gorm:"foreignKey:CollectionId"`
-	RarityId     string     `gorm:"not null"`
-	Rarity       Rarity     `gorm:"foreignKey:RarityId"`
-	Image        string     `gorm:"not null"`
+	ID    string `gorm:"primaryKey"` //id from game files
+	Name  string `gorm:"not null"`
+	Image string `gorm:"not null"`
+
+	RarityId string `gorm:"not null"`
+	Rarity   Rarity `gorm:"foreignKey:RarityId"`
+
+	CaseID *string //optional not every sticker is in a case
+	Case   *Case   `gorm:"foreignKey:CaseID"`
+
+	CollectionId *string
+	Collection   *Collection `gorm:"foreignKey:CollectionId"` //optional, to make populating easier
 
 	//Tournament stickers
-	TournamentId string         //optional
-	TeamId       string         //optional
-	Tournament   Tournament     `gorm:"foreignKey:TournamentId"`
-	Team         TournamentTeam `gorm:"foreignKey:TeamId"`
+	TournamentId *uint32         //optional
+	TeamId       *uint32         //optional
+	Tournament   *Tournament     `gorm:"foreignKey:TournamentId"`
+	Team         *TournamentTeam `gorm:"foreignKey:TeamId"`
 }
 
 type Patch struct {
@@ -239,9 +249,12 @@ type Charm struct {
 }
 
 type Case struct { //TODO: Refractor to fit CSGO API
-	ID           string     `gorm:"primaryKey"`
-	Name         string     `gorm:"unique;not null"`
-	CollectionId string     `gorm:"not null"`
-	Collection   Collection `gorm:"foreignKey:CollectionId"`
-	Image        string     `gorm:"not null"`
+	ID    string `gorm:"primaryKey"`
+	Name  string `gorm:"unique;not null"`
+	Image string `gorm:"not null"`
+
+	Stickers []Sticker `gorm:"foreignKey:CaseID"`
+
+	Collection   *Collection `gorm:"foreignKey:CollectionId"`
+	CollectionId *string     //nullable to make populating easier
 }

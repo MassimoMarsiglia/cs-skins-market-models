@@ -181,7 +181,7 @@ type Skin struct {
 	Crates      []Crate          `json:"crates"`
 	Weapon      Weapon           `json:"weapon"`
 	Category    Category         `json:"category"`
-	Teams       Team             `json:"team"`
+	Team       Team             `json:"team"`
 	Wears       []Wear           `json:"wears"`
 	Pattern     Pattern          `json:"pattern"`
 }
