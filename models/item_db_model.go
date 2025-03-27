@@ -47,7 +47,6 @@ type Collection struct {
 	Skins    []Skin    `gorm:"foreignKey:CollectionId"`
 	Stickers []Sticker `gorm:"foreignKey:CollectionId"`
 	Agents   []Agent   `gorm:"foreignKey:CollectionId"`
-	Patches  []Patch   `gorm:"foreignKey:CollectionId"`
 	Charms   []Charm   `gorm:"foreignKey:CollectionId"`
 }
 
@@ -141,10 +140,26 @@ type ItemSkin struct {
 	Souvenir bool // Defines if a skin is souvenir
 }
 
+type Category struct {
+	ID   string `gorm:"primaryKey"`
+	Name string `gorm:"unique;not null"`
+}
+
+type Team struct {
+	ID   string `gorm:"primaryKey"`
+	Name string `gorm:"unique;not null"`
+}
+
+type Pattern struct {
+	ID   string `gorm:"primaryKey"`
+	Name string `gorm:"unique;not null"`
+}
+
 // define base skin without specific wears
 type Skin struct {
 	ID           string     `gorm:"primaryKey"`
 	Name         string     `gorm:"unique;not null"`
+	Image        string     `gorm:"not null"`
 	CollectionId string     `gorm:"not null"`
 	Collection   Collection `gorm:"foreignKey:CollectionId"`
 	WeaponId     string     `gorm:"not null"`
@@ -156,7 +171,19 @@ type Skin struct {
 	MaxFloat     float64    `gorm:"not null"`
 	Stattrak     bool       //defines if a skin can be stattrak
 	Souvenir     bool       //defines if a skin can be souvenir
-	PaintSeed    uint
+
+	CategoryId string   `gorm:"not null"`
+	Category   Category `gorm:"foreignKey:CategoryId;references:ID;constraint:OnDelete:CASCADE"`
+
+	Team   Team `gorm:"foreignKey:TeamId"`
+	TeamId string
+
+	Wears []Wear `gorm:"many2many:skin_wears;"`
+
+	Pattern   Pattern `gorm:"foreignKey:PatternId"`
+	PatternId string  `gorm:"not null"`
+
+	//TODO: ADD Crate relation after refractoring case
 }
 
 type Sticker struct {
@@ -176,13 +203,11 @@ type Sticker struct {
 }
 
 type Patch struct {
-	ID           string     `gorm:"primaryKey"`
-	Name         string     `gorm:"unique;not null"`
-	CollectionId string     `gorm:"not null"`
-	Collection   Collection `gorm:"foreignKey:CollectionId"`
-	RarityId     string     `gorm:"not null"`
-	Rarity       Rarity     `gorm:"foreignKey:RarityId"`
-	Image        string     `gorm:"not null"`
+	ID       string `gorm:"primaryKey"`
+	Name     string `gorm:"unique;not null"`
+	RarityId string `gorm:"not null"`
+	Rarity   Rarity `gorm:"foreignKey:RarityId"`
+	Image    string `gorm:"not null"`
 }
 
 type TeamType string
@@ -213,7 +238,7 @@ type Charm struct {
 	Image        string     `gorm:"not null"`
 }
 
-type Case struct {
+type Case struct { //TODO: Refractor to fit CSGO API
 	ID           string     `gorm:"primaryKey"`
 	Name         string     `gorm:"unique;not null"`
 	CollectionId string     `gorm:"not null"`

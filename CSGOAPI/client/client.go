@@ -8,10 +8,14 @@ import (
 
 type CSGOAPIClient struct{}
 
-// getRequest fetches the requested URL and unmarshal the response to the passed interface
+func NewCSGOAPIClient() *CSGOAPIClient {
+	return &CSGOAPIClient{}
+}
+
+// getRequest Fetches the requested URL and unmarshal the response to the passed interface
 // T is the type of the response
 func getRequest[T any](url string) (T, error) {
-	//fetch the requested URL
+	//Fetch the requested URL
 	res, err := http.Get(url)
 
 	//set zeroValue to return in case of error
@@ -37,8 +41,8 @@ func getRequest[T any](url string) (T, error) {
 }
 
 type NameID struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
+	ID   string     `json:"id"`
+	Name json.Token `json:"name"`
 }
 
 type NameIDImage struct {
@@ -75,8 +79,8 @@ type Sticker struct {
 
 type CollectionResp NameIDImage
 
-// fetches the stickers
-func (c *CSGOAPIClient) fetchStickers() (StickerResponse, error) {
+// Fetches the stickers
+func (c *CSGOAPIClient) FetchStickers() (StickerResponse, error) {
 	stickers, err := getRequest[StickerResponse]("https://bymykel.github.io/CSGO-API/api/en/stickers.json")
 	if err != nil {
 		return StickerResponse{}, err
@@ -89,11 +93,11 @@ type AgentResponse []Agent
 
 type Agent struct {
 	BaseItemInstance
-	Collections CollectionResp `json:"collections"`
-	Teams       Team           `json:"team"`
+	Collections []CollectionResp `json:"collections"`
+	Teams       Team             `json:"team"`
 }
 
-func (c *CSGOAPIClient) fetchAgents() (AgentResponse, error) {
+func (c *CSGOAPIClient) FetchAgents() (AgentResponse, error) {
 	agents, err := getRequest[AgentResponse]("https://bymykel.github.io/CSGO-API/api/en/agents.json")
 	if err != nil {
 		return AgentResponse{}, err
@@ -108,7 +112,7 @@ type Patch struct {
 	BaseItemInstance
 }
 
-func (c *CSGOAPIClient) fetchPatches() (PatchResponse, error) {
+func (c *CSGOAPIClient) FetchPatches() (PatchResponse, error) {
 	patches, err := getRequest[PatchResponse]("https://bymykel.github.io/CSGO-API/api/en/patches.json")
 	if err != nil {
 		return PatchResponse{}, err
@@ -121,10 +125,10 @@ type CharmResponse []Charm
 
 type Charm struct {
 	BaseItemInstance
-	Collections CollectionResp `json:"collections"`
+	Collections []CollectionResp `json:"collections"`
 }
 
-func (c *CSGOAPIClient) fetchCharms() (CharmResponse, error) {
+func (c *CSGOAPIClient) FetchCharms() (CharmResponse, error) {
 	charms, err := getRequest[CharmResponse]("https://bymykel.github.io/CSGO-API/api/en/keychains.json")
 	if err != nil {
 		return CharmResponse{}, err
@@ -136,13 +140,13 @@ func (c *CSGOAPIClient) fetchCharms() (CharmResponse, error) {
 type CaseResponse []Cases
 
 type Cases struct {
-	BaseItemInstance
+	BaseItem
 	Type         string   `json:"type"`
-	Contains     []NameID `json:"contains"`
-	ContainsRare []NameID `json:"contains_rare"`
+	Contains     []BaseItemInstance `json:"contains"`
+	ContainsRare []BaseItemInstance `json:"contains_rare"`
 }
 
-func (c *CSGOAPIClient) fetchCases() (CaseResponse, error) {
+func (c *CSGOAPIClient) FetchCases() (CaseResponse, error) {
 	cases, err := getRequest[CaseResponse]("https://bymykel.github.io/CSGO-API/api/en/crates.json")
 	if err != nil {
 		return CaseResponse{}, err
@@ -155,7 +159,7 @@ type SkinResponse []Skin
 
 type Weapon struct {
 	NameID
-	WeaponId string `json:"weapon_id"`
+	WeaponId uint16 `json:"weapon_id"`
 }
 
 type Pattern NameID
@@ -172,7 +176,7 @@ type Skin struct {
 	MaxFloat    float64          `json:"max_float"`
 	Stattrak    bool             `json:"stattrak"`
 	Souvenir    bool             `json:"souvenir"`
-	PaintIndex  uint16           `json:"paint_index"`
+	PaintIndex  json.Number      `json:"paint_index"`
 	Collections []CollectionResp `json:"collections"`
 	Crates      []Crate          `json:"crates"`
 	Weapon      Weapon           `json:"weapon"`
@@ -182,7 +186,7 @@ type Skin struct {
 	Pattern     Pattern          `json:"pattern"`
 }
 
-func (c *CSGOAPIClient) fetchSkins() (SkinResponse, error) {
+func (c *CSGOAPIClient) FetchSkins() (SkinResponse, error) {
 	skins, err := getRequest[SkinResponse]("https://bymykel.github.io/CSGO-API/api/en/skins.json")
 	if err != nil {
 		return SkinResponse{}, err
@@ -195,22 +199,22 @@ type SkinItemResponse []SkinItem
 
 type SkinItem struct {
 	BaseItemInstance
-	SkinId     string   `json:"skin_id"`
-	Weapon     Weapon   `json:"weapon"`
-	Pattern    Pattern  `json:"pattern"`
-	Category   Category `json:"category"`
-	MinFloat   float64  `json:"min_float"`
-	MaxFloat   float64  `json:"max_float"`
-	Wear       Wear     `json:"wear"`
-	Stattrak   bool     `json:"stattrak"`
-	Souvenir   bool     `json:"souvenir"`
-	PaintIndex uint16   `json:"paint_index"`
+	SkinId     string      `json:"skin_id"`
+	Weapon     Weapon      `json:"weapon"`
+	Pattern    Pattern     `json:"pattern"`
+	Category   Category    `json:"category"`
+	MinFloat   float64     `json:"min_float"`
+	MaxFloat   float64     `json:"max_float"`
+	Wear       Wear        `json:"wear"`
+	Stattrak   bool        `json:"stattrak"`
+	Souvenir   bool        `json:"souvenir"`
+	PaintIndex json.Number `json:"paint_index"`
 }
 
-func (c *CSGOAPIClient) fetchSkinItems() (SkinResponse, error) {
-	skins, err := getRequest[SkinResponse]("https://bymykel.github.io/CSGO-API/api/en/skins_not_grouped.json")
+func (c *CSGOAPIClient) FetchSkinItems() (SkinItemResponse, error) {
+	skins, err := getRequest[SkinItemResponse]("https://bymykel.github.io/CSGO-API/api/en/skins_not_grouped.json")
 	if err != nil {
-		return SkinResponse{}, err
+		return SkinItemResponse{}, err
 	}
 
 	return skins, nil
@@ -220,16 +224,16 @@ type CollectionResponse []Collection
 
 type CollectionSkins struct {
 	BaseItemInstance
-	PaintIndex uint16 `json:"paint_index"`
+	PaintIndex json.Number `json:"paint_index"`
 }
 
 type Collection struct {
 	NameIDImage
-	Crates []Crate `json:"crates"`
+	Crates []Crate           `json:"crates"`
 	Skins  []CollectionSkins `json:"contains"`
 }
 
-func (c *CSGOAPIClient) fetchCollections() (CollectionResponse, error) {
+func (c *CSGOAPIClient) FetchCollections() (CollectionResponse, error) {
 	collections, err := getRequest[CollectionResponse]("https://bymykel.github.io/CSGO-API/api/en/collections.json")
 	if err != nil {
 		return CollectionResponse{}, err

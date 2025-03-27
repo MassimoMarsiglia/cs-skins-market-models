@@ -4,6 +4,8 @@ import (
 	"log"
 
 	"github.com/joho/godotenv"
+	"github.com/massimomarsiglia/cs-skins-market-models/CSGOAPI"
+	"github.com/massimomarsiglia/cs-skins-market-models/CSGOAPI/client"
 	"github.com/massimomarsiglia/cs-skins-market-models/database"
 )
 
@@ -14,6 +16,8 @@ func main() {
 	}
 
 	database.InitDB()
+	pop := CSGOAPI.NewPopulator(client.NewCSGOAPIClient())
+	pop.PopulateDB()
 }
 
 
