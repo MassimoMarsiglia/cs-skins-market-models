@@ -30,6 +30,4 @@ This script populates a database with all **CS2** items, including:
 - **Skins**: A **Skin** is a template applicable to multiple items (ex. Field Tested, Factory New version, etc. of a given skin).  
 - **Skin Items**: A **Skin Item** is a specific variation of a **Skin**.  
 - **Items**: An **Item** represents an actual entity in the game economy.
-- **All Items are sourced from
-
 - **All items are sourced from**:  [ByMykel/CSGO-API](https://github.com/ByMykel/CSGO-API)
