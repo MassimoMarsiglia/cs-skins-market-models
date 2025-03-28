@@ -295,3 +295,20 @@ func (r *Repository) CreateSkinItem(s *client.SkinItem, w []models.Wear, tx *gor
 	}
 	return models.ItemSkin{}, nil
 }
+
+func (r *Repository) CreateAgent(a *client.Agent, tx *gorm.DB) (models.Agent, error) {
+	var agent *models.Agent
+
+	// Check if the agent already exists in the database, if not create
+	if err := tx.FirstOrCreate(&agent, models.Agent{
+		ID:           a.ID,
+		Name:         a.Name.(string),
+		CollectionId: a.Collections[0].ID,
+		Image:        a.Image,
+		TeamId:       a.Team.ID,
+		RarityId:     a.Rarity.ID,
+	}).Error; err != nil {
+		return models.Agent{}, err
+	}
+	return *agent, nil
+}

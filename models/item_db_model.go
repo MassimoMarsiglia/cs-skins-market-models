@@ -233,8 +233,10 @@ type Agent struct {
 	Collection   Collection `gorm:"foreignKey:CollectionId"`
 	RarityId     string     `gorm:"not null"`
 	Rarity       Rarity     `gorm:"foreignKey:RarityId"`
-	Team         TeamType   `gorm:"type:team_type;not null"`
 	Image        string     `gorm:"not null"`
+
+	TeamId string `gorm:"not null"`
+	Team   Team   `gorm:"foreignKey:TeamId"`
 }
 
 type Charm struct {

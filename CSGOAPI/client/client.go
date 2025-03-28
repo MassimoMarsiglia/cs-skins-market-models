@@ -94,7 +94,7 @@ type AgentResponse []Agent
 type Agent struct {
 	BaseItemInstance
 	Collections []CollectionResp `json:"collections"`
-	Teams       Team             `json:"team"`
+	Team        Team             `json:"team"`
 }
 
 func (c *CSGOAPIClient) FetchAgents() (AgentResponse, error) {

@@ -43,6 +43,10 @@ func (p *Populator) PopulateDB() {
 		panic(err)
 	}
 
+	err = p.processAgents(data.Agents)
+	if err != nil {		panic(err)
+	}
+
 	fmt.Println("Time since start: ", time.Since(t))
 	time.Sleep(10 * time.Second)
 }
@@ -180,6 +184,37 @@ func (p *Populator) processSkinItems(s client.SkinItemResponse) error {
 			}
 
 			_, err = p.r.CreateSkinItem(&skin, wears, tx)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *Populator) processAgents(a client.AgentResponse) error {
+	if err := database.DB.Transaction(func(tx *gorm.DB) error {
+		for _, agent := range a {
+
+			_, err := p.r.CreateCollection(agent.Collections, tx)
+			if err != nil {
+				return err
+			}
+
+			_, err = p.r.CreateTeam(&agent.Team, tx)
+			if err != nil {
+				return err
+			}
+
+			_, err = p.r.CreateRarity(&agent.Rarity, tx)
+			if err != nil {
+				return err
+			}
+
+			_, err = p.r.CreateAgent(&agent, tx)
 			if err != nil {
 				return err
 			}
