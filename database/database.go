@@ -28,7 +28,6 @@ func Connect() {
 
 func InitDB() {
 	Connect()
-	DB.Exec("DROP SCHEMA public CASCADE; CREATE SCHEMA public;")
 	createEnums()
 
 	if err := DB.AutoMigrate(
