@@ -48,6 +48,10 @@ func (p *Populator) PopulateDB() {
 		panic(err)
 	}
 
+	if err = p.processCharms(data.Charms); err != nil {
+		panic(err)
+	}
+
 	fmt.Println("Time since start: ", time.Since(t))
 	time.Sleep(10 * time.Second)
 }
@@ -237,6 +241,32 @@ func (p *Populator) processPatches(pa client.PatchResponse) error {
 			}
 
 			_, err = p.r.CreatePatch(&patch, tx)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *Populator) processCharms(c client.CharmResponse) error {
+	if err := database.DB.Transaction(func(tx *gorm.DB) error {
+		for _, charm := range c {
+
+			_, err := p.r.CreateCollection(charm.Collections, tx)
+			if err != nil {
+				return err
+			}
+
+			_, err = p.r.CreateRarity(&charm.Rarity, tx)
+			if err != nil {
+				return err
+			}
+
+			_, err = p.r.CreateCharm(&charm, tx)
 			if err != nil {
 				return err
 			}

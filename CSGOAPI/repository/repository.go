@@ -325,3 +325,19 @@ func (r *Repository) CreatePatch(p *client.Patch, tx *gorm.DB) (models.Patch, er
 	}
 	return *patch, nil
 }
+
+func (r *Repository) CreateCharm(c *client.Charm, tx *gorm.DB) (models.Charm, error) {
+	var charm *models.Charm
+
+	// Check if the charm already exists in the database, if not create
+	if err := tx.FirstOrCreate(&charm, models.Charm{
+		ID:    c.ID,
+		Name:  c.Name.(string),
+		Image: c.Image,
+		RarityId: c.Rarity.ID,
+		CollectionId: c.Collections[0].ID,
+	}).Error; err != nil {
+		return models.Charm{}, err
+	}
+	return *charm, nil
+}
