@@ -312,3 +312,16 @@ func (r *Repository) CreateAgent(a *client.Agent, tx *gorm.DB) (models.Agent, er
 	}
 	return *agent, nil
 }
+
+func (r *Repository) CreatePatch(p *client.Patch, tx *gorm.DB) (models.Patch, error) {
+	var patch *models.Patch
+	if err := tx.FirstOrCreate(&patch, models.Patch{
+		ID:       p.ID,
+		Name:     p.Name.(string),
+		Image:    p.Image,
+		RarityId: p.Rarity.ID,
+	}).Error; err != nil {
+		return models.Patch{}, err
+	}
+	return *patch, nil
+}

@@ -28,23 +28,24 @@ func (p *Populator) PopulateDB() {
 		panic(err)
 	}
 
-	err = p.processStickers(data.Stickers)
-	if err != nil {
+	if err := p.processStickers(data.Stickers); err != nil {
 		panic(err)
 	}
 
-	err = p.processSkins(data.Skins)
-	if err != nil {
+	if err := p.processSkins(data.Skins); err != nil {
 		panic(err)
 	}
 
-	err = p.processSkinItems(data.SkinItems)
-	if err != nil {
+	if err := p.processSkinItems(data.SkinItems); err != nil {
 		panic(err)
 	}
 
-	err = p.processAgents(data.Agents)
-	if err != nil {		panic(err)
+	if err = p.processAgents(data.Agents); err != nil {
+		panic(err)
+	}
+
+	if err = p.processPatches(data.Patches); err != nil {
+		panic(err)
 	}
 
 	fmt.Println("Time since start: ", time.Since(t))
@@ -215,6 +216,27 @@ func (p *Populator) processAgents(a client.AgentResponse) error {
 			}
 
 			_, err = p.r.CreateAgent(&agent, tx)
+			if err != nil {
+				return err
+			}
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *Populator) processPatches(pa client.PatchResponse) error {
+	if err := database.DB.Transaction(func(tx *gorm.DB) error {
+		for _, patch := range pa {
+
+			_, err := p.r.CreateRarity(&patch.Rarity, tx)
+			if err != nil {
+				return err
+			}
+
+			_, err = p.r.CreatePatch(&patch, tx)
 			if err != nil {
 				return err
 			}
