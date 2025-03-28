@@ -53,7 +53,6 @@ func (p *Populator) PopulateDB() {
 	}
 
 	fmt.Println("Time since start: ", time.Since(t))
-	time.Sleep(10 * time.Second)
 }
 
 func (p *Populator) processStickers(s client.StickerResponse) error {
