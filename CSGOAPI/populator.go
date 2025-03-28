@@ -297,8 +297,6 @@ type FetchedData struct {
 	Agents      client.AgentResponse
 	Patches     client.PatchResponse
 	Charms      client.CharmResponse
-	Cases       client.CaseResponse
-	Collections client.CollectionResponse
 	Skins       client.SkinResponse
 	Stickers    client.StickerResponse
 	SkinItems   client.SkinItemResponse
@@ -354,36 +352,6 @@ func (p *Populator) fetchData() (*FetchedData, error) {
 		} else {
 			result.Charms = charms
 			fmt.Printf("Fetched %d charms\n", len(charms))
-		}
-		mu.Unlock()
-	}()
-
-	// Fetch cases
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		cases, err := p.c.FetchCases()
-		mu.Lock()
-		if err != nil {
-			result.Errors["cases"] = err
-		} else {
-			result.Cases = cases
-			fmt.Printf("Fetched %d cases\n", len(cases))
-		}
-		mu.Unlock()
-	}()
-
-	// Fetch collections
-	wg.Add(1)
-	go func() {
-		defer wg.Done()
-		collections, err := p.c.FetchCollections()
-		mu.Lock()
-		if err != nil {
-			result.Errors["collections"] = err
-		} else {
-			result.Collections = collections
-			fmt.Printf("Fetched %d collections\n", len(collections))
 		}
 		mu.Unlock()
 	}()
