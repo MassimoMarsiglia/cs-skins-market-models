@@ -40,7 +40,7 @@ type Rarity struct {
 
 type Weapon struct {
 	ID   string `gorm:"primaryKey"`
-	Name string `not null"`
+	Name string `gorm:"not null"`
 }
 
 type Collection struct {
@@ -187,7 +187,17 @@ type Skin struct {
 	Pattern   Pattern `gorm:"foreignKey:PatternId"`
 	PatternId string  `gorm:"not null"`
 
-	//TODO: ADD Crate relation after refractoring case
+	Crates []Case `gorm:"many2many:skin_crates;"`
+}
+
+type SkinWear struct {
+	SkinID string `gorm:"primaryKey"`
+	WearID string `gorm:"primaryKey"`
+}
+
+type SkinCrate struct {
+	SkinID string `gorm:"primaryKey"`
+	CaseID string `gorm:"not null"`
 }
 
 type Sticker struct {

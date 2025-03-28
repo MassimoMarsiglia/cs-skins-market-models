@@ -16,8 +16,8 @@ type Populator struct {
 	r *repository.Repository
 }
 
-func NewPopulator(c *client.CSGOAPIClient) *Populator {
-	return &Populator{c: c}
+func NewPopulator() *Populator {
+	return &Populator{}
 }
 
 func (p *Populator) PopulateDB() {
@@ -130,6 +130,11 @@ func (p *Populator) processSkins(s client.SkinResponse) error {
 				return err
 			}
 
+			crates, err := p.r.CreateCrate(skin.Crates, tx)
+			if err != nil {
+				return err
+			}
+
 			wears, err := p.r.CreateWears(skin.Wears, tx)
 			if err != nil {
 				//continue if no wears were created as some skins dont have wears such as vanillas
@@ -144,6 +149,16 @@ func (p *Populator) processSkins(s client.SkinResponse) error {
 			}
 
 			_, err = p.r.CreateSkin(&skin, &rarity.ID, &weapon.ID, collectionID, &category.ID, &team.ID, &pattern.ID, wears, tx)
+			if err != nil {
+				return err
+			}
+
+			_, err = p.r.CreateSkinCrateAssociation(&skin.ID, crates, tx)
+			if err != nil {
+				return err
+			}
+
+			_, err = p.r.CreateSkinWearAssociation(&skin.ID, wears, tx)
 			if err != nil {
 				return err
 			}

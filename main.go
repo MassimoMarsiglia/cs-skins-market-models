@@ -5,7 +5,6 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/massimomarsiglia/cs-skins-market-models/CSGOAPI"
-	"github.com/massimomarsiglia/cs-skins-market-models/CSGOAPI/client"
 	"github.com/massimomarsiglia/cs-skins-market-models/database"
 )
 
@@ -15,7 +14,7 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 	database.InitDB()
-	pop := CSGOAPI.NewPopulator(client.NewCSGOAPIClient())
+	pop := CSGOAPI.NewPopulator()
 	pop.PopulateDB()
 }
 

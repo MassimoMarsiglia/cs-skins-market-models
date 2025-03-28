@@ -12,6 +12,10 @@ import (
 
 type Repository struct{}
 
+func NewRepository() *Repository {
+	return &Repository{}
+}
+
 func (r *Repository) CreateCrate(c []client.Crate, tx *gorm.DB) ([]models.Case, error) {
 	var crates []models.Case
 	for _, crate := range c {
@@ -331,13 +335,47 @@ func (r *Repository) CreateCharm(c *client.Charm, tx *gorm.DB) (models.Charm, er
 
 	// Check if the charm already exists in the database, if not create
 	if err := tx.FirstOrCreate(&charm, models.Charm{
-		ID:    c.ID,
-		Name:  c.Name.(string),
-		Image: c.Image,
-		RarityId: c.Rarity.ID,
+		ID:           c.ID,
+		Name:         c.Name.(string),
+		Image:        c.Image,
+		RarityId:     c.Rarity.ID,
 		CollectionId: c.Collections[0].ID,
 	}).Error; err != nil {
 		return models.Charm{}, err
 	}
 	return *charm, nil
+}
+
+func (r *Repository) CreateSkinCrateAssociation(sID *string, crateIDs []models.Case, tx *gorm.DB) ([]models.SkinCrate, error) {
+	var skinCrates []models.SkinCrate
+
+	for _, crate := range crateIDs {
+		var skinCrate models.SkinCrate
+		// Check if the skin crate association already exists in the database, if not create
+		if err := tx.FirstOrCreate(&skinCrate, models.SkinCrate{
+			SkinID: *sID,
+			CaseID: crate.ID,
+		}).Error; err != nil {
+			return []models.SkinCrate{}, err
+		}
+		skinCrates = append(skinCrates, skinCrate)
+	}
+	return skinCrates, nil
+}
+
+func (r *Repository) CreateSkinWearAssociation(sID *string, wID []models.Wear, tx *gorm.DB) ([]models.SkinWear, error) {
+	var skinWears []models.SkinWear
+
+	for _, wear := range wID {
+		var skinWear models.SkinWear
+		// Check if the skin wear association already exists in the database, if not create
+		if err := tx.FirstOrCreate(&skinWear, models.SkinWear{
+			WearID: wear.ID,
+			SkinID: *sID,
+		}).Error; err != nil {
+			return []models.SkinWear{}, err
+		}
+		skinWears = append(skinWears, skinWear)
+	}
+	return skinWears, nil
 }
