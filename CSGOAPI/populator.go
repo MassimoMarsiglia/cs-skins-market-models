@@ -38,6 +38,11 @@ func (p *Populator) PopulateDB() {
 		panic(err)
 	}
 
+	err = p.processSkinItems(data.SkinItems)
+	if err != nil {
+		panic(err)
+	}
+
 	fmt.Println("Time since start: ", time.Since(t))
 	time.Sleep(10 * time.Second)
 }
@@ -118,7 +123,10 @@ func (p *Populator) processSkins(s client.SkinResponse) error {
 
 			wears, err := p.r.CreateWears(skin.Wears, tx)
 			if err != nil {
-				return err
+				//continue if no wears were created as some skins dont have wears such as vanillas
+				if err.Error() != "no valid wears were created" {
+					return err
+				}
 			}
 
 			var collectionID *string
@@ -131,6 +139,50 @@ func (p *Populator) processSkins(s client.SkinResponse) error {
 				return err
 			}
 
+		}
+		return nil
+	}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *Populator) processSkinItems(s client.SkinItemResponse) error {
+	if err := database.DB.Transaction(func(tx *gorm.DB) error {
+		for _, skin := range s {
+
+			_, err := p.r.CreateRarity(&skin.Rarity, tx)
+			if err != nil {
+				return err
+			}
+
+			_, err = p.r.CreateWeapon(&skin.Weapon, tx)
+			if err != nil {
+				return err
+			}
+
+			_, err = p.r.CreateCategory(&skin.Category, tx)
+			if err != nil {
+				return err
+			}
+
+			wears, err := p.r.CreateWears([]client.Wear{skin.Wear}, tx)
+			if err != nil {
+				//continue if no wears were created as some skins dont have wears such as vanillas
+				if err.Error() != "no valid wears were created" {
+					return err
+				}
+			}
+
+			_, err = p.r.CreatePattern(&skin.Pattern, tx)
+			if err != nil {
+				return err
+			}
+
+			_, err = p.r.CreateSkinItem(&skin, wears, tx)
+			if err != nil {
+				return err
+			}
 		}
 		return nil
 	}); err != nil {

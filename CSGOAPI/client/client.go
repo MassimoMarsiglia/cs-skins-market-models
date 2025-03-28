@@ -141,7 +141,7 @@ type CaseResponse []Cases
 
 type Cases struct {
 	BaseItem
-	Type         string   `json:"type"`
+	Type         string             `json:"type"`
 	Contains     []BaseItemInstance `json:"contains"`
 	ContainsRare []BaseItemInstance `json:"contains_rare"`
 }
@@ -181,7 +181,7 @@ type Skin struct {
 	Crates      []Crate          `json:"crates"`
 	Weapon      Weapon           `json:"weapon"`
 	Category    Category         `json:"category"`
-	Team       Team             `json:"team"`
+	Team        Team             `json:"team"`
 	Wears       []Wear           `json:"wears"`
 	Pattern     Pattern          `json:"pattern"`
 }

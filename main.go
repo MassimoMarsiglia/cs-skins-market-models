@@ -14,7 +14,6 @@ func main() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-
 	database.InitDB()
 	pop := CSGOAPI.NewPopulator(client.NewCSGOAPIClient())
 	pop.PopulateDB()

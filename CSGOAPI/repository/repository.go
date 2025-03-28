@@ -107,7 +107,7 @@ func (r *Repository) CreateWears(w []client.Wear, tx *gorm.DB) ([]models.Wear, e
 	for _, wear := range w {
 		var wearModel models.Wear
 
-		//transform wear name to enum
+		// Transform wear name to enum
 		wearName, err := func() (models.WearType, error) {
 			if name, ok := wear.Name.(string); ok {
 				return models.WearType(name), nil
@@ -115,54 +115,60 @@ func (r *Repository) CreateWears(w []client.Wear, tx *gorm.DB) ([]models.Wear, e
 			return models.WearType(""), fmt.Errorf("invalid wear name")
 		}()
 		if err != nil {
-			return []models.Wear{}, err
+			// Log the error and continue with the next item
+			log.Printf("Error processing wear ID %v: %v", wear.ID, err)
+			continue // Skip this wear and proceed with the next one
 		}
 
-		//create wear model
+		// Create wear model
 		if err := tx.FirstOrCreate(&wearModel, models.Wear{
 			ID:   wear.ID,
 			Name: wearName,
 		}).Error; err != nil {
-			return []models.Wear{}, err
+			return nil, err // Return nil to indicate failure
 		}
 		wears = append(wears, wearModel)
 	}
+
+	if len(wears) == 0 {
+		return nil, fmt.Errorf("no valid wears were created") // Optionally, return an error if no valid wears were processed
+	}
+
 	return wears, nil
 }
-
 func safeGetString(token interface{}, objectID string, fieldName string) string {
-    if token == nil {
-        log.Printf("WARNING: %s has nil %s field", objectID, fieldName)
-        return fmt.Sprintf("Unknown_%s", objectID)
-    }
-    
-    // Try type assertion to string
-    if str, ok := token.(string); ok {
-        return str
-    }
-    
-    // If type assertion fails, log the actual type and value
-    tokenType := reflect.TypeOf(token)
-    tokenValue := fmt.Sprintf("%v", token)
-    log.Printf("WARNING: Type assertion failed on %s.%s - Expected string but got %v (%s: %s)", 
-        objectID, fieldName, tokenType, fieldName, tokenValue)
-    
-    // Convert other types to string
-    switch v := token.(type) {
-    case float64:
-        return fmt.Sprintf("%.0f", v) // Convert float64 to string without decimal places
-    case int:
-        return fmt.Sprintf("%d", v)
-    case bool:
-        return fmt.Sprintf("%t", v)
-    default:
-        return tokenValue
-    }
+	if token == nil {
+		log.Printf("WARNING: %s has nil %s field", objectID, fieldName)
+		return fmt.Sprintf("Unknown_%s", objectID)
+	}
+
+	// Try type assertion to string
+	if str, ok := token.(string); ok {
+		return str
+	}
+
+	// If type assertion fails, log the actual type and value
+	tokenType := reflect.TypeOf(token)
+	tokenValue := fmt.Sprintf("%v", token)
+	log.Printf("WARNING: Type assertion failed on %s.%s - Expected string but got %v (%s: %s)",
+		objectID, fieldName, tokenType, fieldName, tokenValue)
+
+	// Convert other types to string
+	switch v := token.(type) {
+	case float64:
+		return fmt.Sprintf("%.0f", v) // Convert float64 to string without decimal places
+	case int:
+		return fmt.Sprintf("%d", v)
+	case bool:
+		return fmt.Sprintf("%t", v)
+	default:
+		return tokenValue
+	}
 }
 
 func (r *Repository) CreatePattern(p *client.Pattern, tx *gorm.DB) (models.Pattern, error) {
 	var pattern *models.Pattern
-	
+
 	// Check if the pattern already exists in the database, if not create
 	if err := tx.FirstOrCreate(&pattern, models.Pattern{
 		ID:   p.ID,
@@ -266,4 +272,26 @@ func (r *Repository) CreateSkin(s *client.Skin, rarID *string, wID *string, colI
 		return models.Skin{}, err
 	}
 	return models.Skin{}, nil
+}
+
+func (r *Repository) CreateSkinItem(s *client.SkinItem, w []models.Wear, tx *gorm.DB) (models.ItemSkin, error) {
+
+	var skinItem models.ItemSkin
+
+	var skin = models.ItemSkin{
+		ID:             s.ID,
+		MarketHashName: s.MarketHashName,
+		SkinId:         s.SkinId,
+		Image:          s.Image,
+		Stattrak:       s.Stattrak,
+		Souvenir:       s.Souvenir,
+	}
+	if len(w) > 0 {
+		skinItem.WearId = &w[0].ID
+	}
+
+	if err := tx.FirstOrCreate(&skinItem, &skin).Error; err != nil {
+		return models.ItemSkin{}, err
+	}
+	return models.ItemSkin{}, nil
 }

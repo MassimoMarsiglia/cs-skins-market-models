@@ -65,22 +65,22 @@ type Item struct {
 }
 
 type ItemProperties struct {
-	ID        string `gorm:"primaryKey"`
-	ItemID    string `gorm:"not null"`
-	PatchId   *string
-	AgentId   *string
-	CharmId   *string
-	StickerId *string
-	SkinId    *string
-	CaseId    *string
+	ID         string  `gorm:"primaryKey"`
+	ItemID     string  `gorm:"not null"`
+	PatchId    *string `gorm:"default:null"`
+	AgentId    *string `gorm:"default:null"`
+	CharmId    *string `gorm:"default:null"`
+	StickerId  *string `gorm:"default:null"`
+	SkinItemId *string `gorm:"default:null"`
+	CaseId     *string `gorm:"default:null"`
 
-	Item    Item      `gorm:"foreignKey:ItemID;references:ID;constraint:OnDelete:CASCADE"`
-	Case    *Case     `gorm:"foreignKey:CaseId;references:ID;constraint:OnDelete:CASCADE"`
-	Skin    *ItemSkin `gorm:"foreignKey:SkinId;references:ItemSkinId;constraint:OnDelete:CASCADE"`
-	Patch   *Patch    `gorm:"foreignKey:PatchId;references:ID;constraint:OnDelete:CASCADE"`
-	Agent   *Agent    `gorm:"foreignKey:AgentId;references:ID;constraint:OnDelete:CASCADE"`
-	Charm   *Charm    `gorm:"foreignKey:CharmId;references:ID;constraint:OnDelete:CASCADE"`
-	Sticker *Sticker  `gorm:"foreignKey:StickerId;references:ID;constraint:OnDelete:CASCADE"`
+	Item     Item      `gorm:"foreignKey:ItemID;references:ID;constraint:OnDelete:CASCADE"`
+	Case     *Case     `gorm:"foreignKey:CaseId;references:ID;constraint:OnDelete:CASCADE"`
+	SkinItem *ItemSkin `gorm:"foreignKey:SkinItemId;references:ID;constraint:OnDelete:CASCADE"`
+	Patch    *Patch    `gorm:"foreignKey:PatchId;references:ID;constraint:OnDelete:CASCADE"`
+	Agent    *Agent    `gorm:"foreignKey:AgentId;references:ID;constraint:OnDelete:CASCADE"`
+	Charm    *Charm    `gorm:"foreignKey:CharmId;references:ID;constraint:OnDelete:CASCADE"`
+	Sticker  *Sticker  `gorm:"foreignKey:StickerId;references:ID;constraint:OnDelete:CASCADE"`
 }
 
 type ItemAttributes struct {
@@ -131,17 +131,16 @@ type StickerAttributes struct {
 
 // Specific ItemSkin (meaning the actual item)
 type ItemSkin struct {
-	ItemSkinId     string `gorm:"primaryKey"` // Composite primary key
+	ID             string `gorm:"primaryKey"`
 	MarketHashName string
-	WearId         string `gorm:"not null"` // Foreign key reference
-	SkinId         string `gorm:"not null"` // Foreign key reference
 	Image          string `gorm:"not null"`
+	Stattrak       bool   `gorm:"not null"`                                                    // Defines if a skin is stattrak
+	Souvenir       bool   `gorm:"not null"`                                                    // Defines if a skin is souvenir
+	SkinId         string `gorm:"not null"`                                                    // Foreign key reference
+	Skin           Skin   `gorm:"foreignKey:SkinId;references:ID;constraint:OnDelete:CASCADE"` // Ensures correct mapping to Skin.ID
 
-	Wear Wear `gorm:"foreignKey:WearId;references:ID;constraint:OnDelete:CASCADE"` // Ensures correct mapping to Wear.ID
-	Skin Skin `gorm:"foreignKey:SkinId;references:ID;constraint:OnDelete:CASCADE"` // Ensures correct mapping to Skin.ID
-
-	Stattrak bool // Defines if a skin is stattrak
-	Souvenir bool // Defines if a skin is souvenir
+	WearId *string `gorm:"default:null"`                                                // Foreign key reference
+	Wear   *Wear   `gorm:"foreignKey:WearId;references:ID;constraint:OnDelete:CASCADE"` // Ensures correct mapping to Wear.ID
 }
 
 type Category struct {
